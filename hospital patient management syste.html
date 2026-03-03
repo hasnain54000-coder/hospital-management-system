@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Patient Management System (HPMS)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* --- ADVANCED DARK THEME CSS --- */
+        :root {
+            --main-bg: #1e1e2d;
+            --content-bg: #27293d;
+            --sidebar-bg: #1b1b28;
+            --primary-color: #5d6eff;
+            --primary-hover: #4a59e7;
+            --text-color: #c0c2d3;
+            --secondary-text: #8b90a0;
+            --opd-color: #ffb848;
+            --emergency-color: #ff3d71;
+            --pharmacy-color: #00d68f;
+            --action-color: #a879fa;
+            --border-color: #3f425c;
+            --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            --list-hover: #343750;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--main-bg);
+            color: var(--text-color);
+            transition: background-color 0.5s;
+        }
+        
+        /* --- Form Elements and Lists --- */
+        .reg-form-group { margin-bottom: 20px; }
+        .reg-form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary-color); }
+        .reg-form-group input[type="text"], 
+        .reg-form-group input[type="number"], 
+        .reg-form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--sidebar-bg);
+            color: var(--text-color);
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        
+        .list-management {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--sidebar-bg);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .manage-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .list-container h3 {
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
+        .patient-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .patient-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: var(--sidebar-bg);
+            border-radius: 6px;
+            border-left: 5px solid;
+            transition: background-color 0.2s;
+        }
+
+        .patient-list li:hover { background-color: var(--list-hover); }
+
+        .patient-list li strong { font-size: 1.1rem; color: white; }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--main-bg); /* Text color for badges */
+        }
+        
+        .empty-list-message {
+            text-align: center;
+            color: var(--secondary-text) !important;
+            padding: 20px !important;
+            font-style: italic;
+            border-left: none !important;
+        }
+        
+        .info-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: var(--sidebar-bg);
+            border-left: 5px solid var(--pharmacy-color);
+        }
+        .info-section h3 {
+            color: var(--opd-color);
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .info-dsa-list {
+            list-style: none;
+            padding: 0;
+        }
+        .info-dsa-list li {
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+        .dsa-keyword {
+            font-weight: 700;
+            color: var(--emergency-color);
+            background-color: rgba(255, 61, 113, 0.1);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        /* Card Colors */
+        .card-opd { border-left-color: var(--opd-color); }
+        .card-emergency { border-left-color: var(--emergency-color); }
+        .card-pharmacy { border-left-color: var(--pharmacy-color); }
+        .card-history { border-left-color: var(--action-color); }
+
+        /* --- LANDING PAGE STYLING --- */
+        .landing-page {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            background: radial-gradient(circle at center, #27293d 0%, #1e1e2d 70%);
+            overflow: hidden;
+            color: white;
+            padding: 20px;
+        }
+        
+        .landing-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(0deg, transparent 24%, rgba(93, 110, 255, 0.05) 25%, rgba(93, 110, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(93, 110, 255, 0.05) 75%, rgba(93, 110, 255, 0.05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(93, 110, 255, 0.05) 25%, rgba(93, 110, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(93, 110, 255, 0.05) 75%, rgba(93, 110, 255, 0.05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            pointer-events: none;
+            opacity: 0.5;
+            z-index: 1;
+        }
+
+        .landing-page h1 {
+            font-size: 3.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 0 15px var(--primary-color), 0 0 5px var(--primary-color);
+            z-index: 2;
+        }
+
+        .landing-page .tagline {
+            font-size: 1.5rem;
+            color: var(--pharmacy-color);
+            margin-bottom: 30px;
+            font-style: italic;
+            font-weight: 500;
+            text-shadow: 0 0 5px rgba(0, 214, 143, 0.3);
+            z-index: 2;
+        }
+        
+        .submission-credit {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 1rem;
+            color: var(--secondary-text);
+            text-align: right;
+            line-height: 1.4;
+            z-index: 2;
+        }
+        
+        .developer-credit {
+            position: absolute;
+            bottom: 20px;
+            left: 30px;
+            font-size: 0.9rem;
+            color: var(--secondary-text);
+            text-align: left;
+            line-height: 1.4;
+            z-index: 2;
+        }
+
+        .start-button {
+            background-color: var(--pharmacy-color);
+            color: var(--main-bg);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 214, 143, 0.5);
+            font-weight: 700;
+            margin-top: 20px;
+            z-index: 2;
+        }
+
+        /* --- DASHBOARD STYLES (Desktop Layout) --- */
+        .dashboard-container {
+            display: none;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+        }
+
+        .sidebar {
+            background-color: var(--sidebar-bg);
+            padding: 20px 0;
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .hpms-console {
+            padding: 0 25px 20px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 14px 25px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            border-left: 5px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover { background-color: #2e3049; border-left-color: var(--primary-color); }
+        .sidebar-menu a.active { background-color: var(--primary-color); color: white; border-left-color: var(--opd-color); }
+        .sidebar-menu i { margin-right: 15px; width: 20px; color: var(--primary-color); }
+        .sidebar-menu a.active i { color: white; }
+        .sidebar-menu .dsa-info {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: var(--secondary-text);
+            margin-left: 40px;
+            display: block;
+            padding-bottom: 5px;
+        }
+        
+        .clear-data-link {
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+            display: block;
+            padding: 15px 25px;
+            background-color: var(--sidebar-bg);
+            color: var(--emergency-color) !important;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .main-content {
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .content-view {
+            display: none;
+            background-color: var(--content-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Container for title and back button */
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        .content-view h1 {
+            margin: 0;
+            color: var(--primary-color);
+            font-weight: 600;
+            border-bottom: none; 
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        
+        .btn-back-to-dash {
+            background-color: var(--secondary-text);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            white-space: nowrap; 
+            margin-top: 5px;
+        }
+
+        .btn-back-to-dash:hover {
+            background-color: #6c757d;
+            transform: translateY(-1px);
+        }
+
+        .status-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background-color: var(--sidebar-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            border-left: 5px solid;
+            text-align: left;
+            transition: all 0.3s;
+        }
+        .card-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: white;
+        }
+
+        .action-buttons button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .btn-register { background-color: var(--primary-color); }
+        .btn-opd { background-color: var(--opd-color); color: var(--main-bg); }
+        .btn-emergency { background-color: var(--emergency-color); }
+        .btn-info { background-color: var(--action-color); }
+        .btn-home { background-color: var(--secondary-text); }
+
+        /* --- MOBILE RESPONSIBLE STYLES (Max Width 768px) --- */
+        @media (max-width: 768px) {
+            
+            /* 1. Landing Page Adjustments */
+            .landing-page h1 { font-size: 2.2rem; }
+            .landing-page .tagline { font-size: 1.2rem; }
+            .submission-credit { top: 10px; right: 10px; font-size: 0.8rem; }
+            .developer-credit { bottom: 10px; left: 10px; font-size: 0.7rem; }
+
+            /* 2. Dashboard Layout Change */
+            .dashboard-container { grid-template-columns: 1fr; } 
+            
+            /* 3. Sidebar (Mobile Toggle Menu) */
+            .sidebar {
+                position: fixed;
+                width: 100%;
+                height: 60px; 
+                padding: 0;
+                border-right: none;
+                z-index: 100;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid var(--border-color);
+                top: 0; /* Pin to top */
+            }
+            
+            .hpms-console {
+                padding: 10px 15px;
+                margin-bottom: 0;
+                font-size: 1.5rem;
+                border-bottom: none;
+            }
+            
+            /* Toggle Button Styling */
+            .menu-toggle {
+                display: block;
+                color: var(--primary-color);
+                font-size: 1.5rem;
+                padding: 10px 15px;
+                cursor: pointer;
+            }
+            
+            /* Change fa-ellipsis-v to fa-bars when menu is closed for better UX */
+            #menuIcon.fa-ellipsis-v:before { content: "\f142"; /* Unicode for fa-bars */ } 
+            #menuIcon.fa-times:before { content: "\f00d"; /* Standard close icon */ }
+
+
+            .sidebar-menu {
+                position: fixed; /* Fixed menu ensures it doesn't scroll with content */
+                top: 60px;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 60px); /* Fill remaining vertical space */
+                overflow-y: auto; /* Allow menu content to scroll if tall */
+                background-color: var(--sidebar-bg);
+                display: none; 
+                flex-direction: column;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+                border-top: 1px solid var(--border-color);
+                z-index: 99;
+            }
+
+            .sidebar-menu a { padding: 15px 20px; border-left: none; }
+            .sidebar-menu a.active { border-right: 5px solid var(--opd-color); }
+
+            .sidebar-menu.active { display: flex; }
+            
+            .dsa-info { display: none !important; } 
+            
+            .clear-data-link {
+                position: static; 
+                border-top: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+
+            /* 4. Main Content Adjustment */
+            .main-content {
+                padding: 15px;
+                padding-top: 75px; /* Account for fixed header */
+                height: 100vh;
+            }
+
+            .content-view {
+                padding: 15px;
+                border-radius: 8px;
+            }
+            
+            .content-header {
+                flex-direction: column; 
+                align-items: flex-start;
+                margin-bottom: 15px;
+            }
+            
+            .btn-back-to-dash {
+                margin-top: 10px;
+                width: 100%;
+                text-align: center;
+            }
+
+
+            .status-cards {
+                grid-template-columns: 1fr; 
+                gap: 15px;
+            }
+            
+            .action-buttons {
+                display: flex;
+                flex-wrap: wrap; 
+                gap: 10px; 
+            }
+
+            .action-buttons button {
+                flex-grow: 1; 
+                margin-right: 0;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            /* List Management */
+            .list-management {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .list-management > div, .list-management > button {
+                width: 100%;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            
+            .patient-list li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .patient-list li .badge {
+                margin-top: 5px;
+                font-size: 0.75rem;
+            }
+
+        }
+        /* End Mobile Styles */
+    </style>
+</head>
+<body>
+
+    <div class="landing-page" id="landingPage">
+        
+        <div class="submission-credit">
+            Submitted to: <br><strong>Sir Fawad Ali Shah</strong>
+        </div>
+        
+        <div class="developer-credit">
+            Developed by: <br>
+            <strong>Muhammad Hasnian Haider</strong> & <strong>Taseer Ahmed</strong>
+        </div>
+
+        <header class="landing-header">
+            <h1><i class="fas fa-hospital-alt"></i> Hospital Patient Management System</h1>
+            <p class="tagline">Dynamic Patient Flow Orchestration using Data Structures (DSA)</p>
+        </header>
+        <button class="start-button" onclick="startDashboard()">
+            <i class="fas fa-play"></i> ACCESS SYSTEM CONSOLE
+        </button>
+    </div>
+
+    <div class="dashboard-container" id="dashboardContainer">
+
+        <div class="sidebar">
+            <div class="hpms-console">HPMS</div>
+            
+            <div class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-ellipsis-v" id="menuIcon"></i>
+            </div>
+
+            <nav class="sidebar-menu" id="sidebarMenu">
+                <a href="#" class="active" onclick="showView('dashboard');"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+
+                <a href="#" onclick="showView('registration');"><i class="fas fa-user-plus"></i> Patient Registration</a>
+
+                <a href="#" onclick="showView('opd');"><i class="fas fa-users"></i> OPD Queue (FIFO)</a>
+                <span class="dsa-info">Queue (First-In, First-Out)</span>
+
+                <a href="#" onclick="showView('emergency');"><i class="fas fa-ambulance"></i> Emergency Triage</a>
+                <span class="dsa-info">Priority Queue</span>
+
+                <a href="#" onclick="showView('pharmacy');"><i class="fas fa-prescription-bottle-alt"></i> Pharmacy Tokens</a>
+                <span class="dsa-info">Circular Queue</span>
+
+                <a href="#" onclick="showView('history');"><i class="fas fa-history"></i> Action History</a>
+                <span class="dsa-info">Stack (LIFO)</span>
+
+                <a href="#" onclick="showView('info');" style="margin-top: 20px;"><i class="fas fa-info-circle"></i> Working Info / DSA</a>
+                
+                <a href="#" class="clear-data-link" onclick="clearAllData();">
+                    <i class="fas fa-eraser"></i> CLEAR SYSTEM DATA
+                </a>
+            </nav>
+        </div>
+
+        <div class="main-content" onclick="closeMenuOnContentClick()">
+
+            <div class="content-view" id="dashboardView">
+                <span style="color: var(--secondary-text); font-size: 0.9rem;">Real-time Data Flow</span>
+                <div class="content-header" style="border-bottom-color: var(--primary-color);">
+                    <h1>System Status Overview</h1>
+                    <button class="btn-home" onclick="returnToHome()"><i class="fas fa-arrow-left"></i> Move Back to Home</button>
+                </div>
+                
+                <div class="status-cards">
+                    <div class="card card-opd">
+                        <h3>OPD Waiting Count</h3>
+                        <div class="card-value" id="opdCount">0</div>
+                    </div>
+                    <div class="card card-emergency">
+                        <h3>Emergency Patients</h3>
+                        <div class="card-value" id="emergencyCount">0</div>
+                    </div>
+                    <div class="card card-pharmacy">
+                        <h3>Active Pharmacy Tokens</h3>
+                        <div class="card-value" id="pharmacyCount">0/10</div>
+                    </div>
+                    <div class="card card-history">
+                        <h3>Total Actions Logged</h3>
+                        <div class="card-value" id="historyCount">0</div>
+                    </div>
+                </div>
+
+                <h2>Quick Actions</h2>
+                <div class="action-buttons">
+                    <button class="btn-register" onclick="showView('registration')"><i class="fas fa-user-plus"></i> Register Patient</button>
+                    <button class="btn-opd" onclick="showView('opd')"><i class="fas fa-users"></i> Manage OPD</button>
+                    <button class="btn-emergency" onclick="showView('emergency')"><i class="fas fa-ambulance"></i> Manage Emergency</button>
+                    <button class="btn-info" onclick="showView('info')"><i class="fas fa-info-circle"></i> Working Info</button>
+                </div>
+
+            </div>
+
+            <div class="content-view" id="registrationView">
+                <div class="content-header">
+                    <h1><i class="fas fa-user-plus"></i> Patient Registration</h1>
+                    <button class="btn-back-to-dash" onclick="showView('dashboard')"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                </div>
+                <div class="reg-form-group">
+                    <label for="patientName">Patient Name</label>
+                    <input type="text" id="patientName" placeholder="Enter Patient Name" required>
+                </div>
+                <div class="reg-form-group">
+                    <label for="patientID">Patient ID</label>
+                    <input type="number" id="patientID" value="1001" min="1000" readonly>
+                </div>
+                <div class="reg-form-group">
+                    <label for="patientSection">Target Section</label>
+                    <select id="patientSection">
+                        <option value="opd">OPD (General Visit) - Queue</option>
+                        <option value="emergency">Emergency - Priority Queue</option>
+                    </select>
+                </div>
+
+                <div class="reg-form-group" id="priorityDiv" style="display: none;">
+                    <label for="patientPriority">Triage Priority (1=Highest, 5=Lowest)</label>
+                    <select id="patientPriority">
+                        <option value="1">1 (Critical)</option>
+                        <option value="2">2 (Urgent)</option>
+                        <option value="3" selected>3 (Semi-Urgent)</option>
+                        <option value="4">4 (Standard)</option>
+                        <option value="5">5 (Minor)</option>
+                    </select>
+                </div>
+
+                <button class="btn-register" onclick="registerPatient()"><i class="fas fa-save"></i> Submit Registration</button>
+            </div>
+
+            <div class="content-view opd-page" id="opdView">
+                <div class="content-header" style="border-bottom-color: var(--opd-color);">
+                    <h1><i class="fas fa-users"></i> OPD Queue Management (FIFO)</h1>
+                    <button class="btn-back-to-dash" onclick="showView('dashboard')"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                </div>
+
+                <div class="list-management">
+                    <div style="font-size: 1.1rem; color: var(--opd-color);">
+                        **Total Patients:** <span id="opdCountDetail" style="font-weight: bold;">0</span>
+                    </div>
+                    <button class="manage-btn btn-opd" onclick="manageOPD()">
+                        <i class="fas fa-arrow-right"></i> Dequeue Next Patient for Doctor
+                    </button>
+                </div>
+
+                <div class="list-container">
+                    <h3>Patient Waiting List (First In Line is on Top)</h3>
+                    <ul class="patient-list" id="opdList">
+                        <li class="empty-list-message">No patients in OPD Queue.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-view emergency-page" id="emergencyView">
+                <div class="content-header" style="border-bottom-color: var(--emergency-color);">
+                    <h1><i class="fas fa-ambulance"></i> Emergency Triage Management (Priority Queue)</h1>
+                    <button class="btn-back-to-dash" onclick="showView('dashboard')"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                </div>
+
+                <div class="list-management">
+                    <div style="font-size: 1.1rem; color: var(--emergency-color);">
+                        **Total Emergency Patients:** <span id="emergencyCountDetail" style="font-weight: bold;">0</span>
+                    </div>
+                    <button class="manage-btn btn-emergency" onclick="manageEmergency()">
+                        <i class="fas fa-arrow-right"></i> Process Highest Priority Patient
+                    </button>
+                </div>
+
+                <div class="list-container">
+                    <h3>Triage List (Highest Priority Patients are on Top)</h3>
+                    <ul class="patient-list" id="emergencyList">
+                        <li class="empty-list-message">No patients in Emergency P-Queue.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-view pharmacy-page" id="pharmacyView">
+                <div class="content-header" style="border-bottom-color: var(--pharmacy-color);">
+                    <h1><i class="fas fa-prescription-bottle-alt"></i> Pharmacy Token Management (Circular Queue)</h1>
+                    <button class="btn-back-to-dash" onclick="showView('dashboard')"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                </div>
+                <p style="color: var(--secondary-text);">The Circular Queue ensures that the pharmacy can manage a fixed number (10) of active prescriptions at once. Once an order is dispensed, the token slot is freed up for the next patient coming from OPD or Emergency.</p>
+
+                <div class="list-management" style="border-color: var(--pharmacy-color);">
+                    <div style="font-size: 1.1rem; color: var(--pharmacy-color);">
+                        **Active Tokens:** <span id="pharmacyCountDetail" style="font-weight: bold;">0/10</span>
+                    </div>
+                    <button class="manage-btn" style="background-color: var(--pharmacy-color); color: var(--main-bg);" onclick="managePharmacy()">
+                        <i class="fas fa-check"></i> Dispense Order (Dequeue Token)
+                    </button>
+                </div>
+
+                <div class="list-container">
+                    <h3>Active Token List</h3>
+                    <ul class="patient-list" id="pharmacyList">
+                        <li class="empty-list-message">No active tokens in C-Queue.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-view history-page" id="historyView">
+                <div class="content-header" style="border-bottom-color: var(--action-color);">
+                    <h1><i class="fas fa-history"></i> Action History (Stack)</h1>
+                    <button class="btn-back-to-dash" onclick="showView('dashboard')"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                </div>
+                <p style="color: var(--secondary-text);">The Stack records all major system operations in a **Last-In, First-Out (LIFO)** order. This is typically used for system audits, logging, or implementing an 'undo' feature.</p>
+                <div class="list-management" style="border-color: var(--action-color);">
+                    <div style="font-size: 1.1rem; color: var(--action-color);">
+                        **Total Actions Recorded:** <span id="historyCountDetail" style="font-weight: bold;">0</span>
+                    </div>
+                    <button class="manage-btn" style="background-color: var(--action-color);" onclick="undoLastAction()">
+                        <i class="fas fa-undo"></i> Pop Last Action (Simulate Undo)
+                    </button>
+                </div>
+
+                <div class="list-container">
+                    <h3>Action Log (Last Action on Top)</h3>
+                    <ul class="patient-list" id="historyList">
+                        <li class="empty-list-message">No actions recorded yet.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-view" id="infoView">
+                <div class="content-header" style="border-bottom-color: var(--pharmacy-color);">
+                    <h1><i class="fas fa-cogs"></i> System Working Information</h1>
+                    <button class="btn-back-to-dash" onclick="showView('dashboard')"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                </div>
+                
+                <div class="info-section">
+                    <h3>System Goal</h3>
+                    <p>This Hospital Patient Management System (HPMS) is a simulated web application designed to demonstrate the practical application of fundamental **Data Structures and Algorithms (DSA)** in managing patient flow efficiently within a hospital environment.</p>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Core Data Structures Used</h3>
+                    <p>The system is built entirely around four core data structures, each fulfilling a specific operational need in the hospital workflow:</p>
+                    <ul class="info-dsa-list">
+                        <li class="dsa-opd">
+                            <i class="fas fa-users"></i> **OPD Queue:** Uses a <span class="dsa-keyword">Queue (FIFO)</span>. Patients are seen in the exact order they arrive (**First-In, First-Out**).
+                        </li>
+                        <li class="dsa-emergency">
+                            <i class="fas fa-ambulance"></i> **Emergency Triage:** Uses a <span class="dsa-keyword">Priority Queue</span>. Patients are ordered by their Triage Priority (1 is highest). The highest priority patient is processed next, regardless of arrival time.
+                        </li>
+                        <li class="dsa-pharmacy">
+                            <i class="fas fa-prescription-bottle-alt"></i> **Pharmacy Tokens:** Uses a <span class="dsa-keyword">Circular Queue</span> (Max Size 10). This handles the continuous, rotational flow of patients waiting for medication, efficiently reusing the limited number of dispensing slots.
+                        </li>
+                        <li class="dsa-history">
+                            <i class="fas fa-history"></i> **Action History:** Uses a <span class="dsa-keyword">Stack (LIFO)</span>. Every major action (Registration, Dequeue) is logged. The last action performed is the first one available for retrieval (or 'undo').
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Workflow Explained (How Patients Move)</h3>
+                    <p>When a patient is managed (dequeued) from either the OPD Queue or the Emergency Priority Queue, they are automatically transferred to the Pharmacy Token Circular Queue to simulate the dispensing stage.</p>
+                    <p style="font-style: italic; color: var(--opd-color);">**Flow:** Registration $\rightarrow$ Queue/P-Queue $\xrightarrow{\text{Dequeue}} $ Circular Queue $\xrightarrow{\text{Dequeue}} $ Discharged</p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- JavaScript for DSA and Logic ---
+
+        // Global Patient Counter
+        let patientIDCounter = 1000;
+
+        // --- DSA Implementations ---
+        class Stack {
+            constructor() { this.items = []; }
+            push(element) { this.items.push(element); }
+            pop() { return this.items.pop(); }
+            size() { return this.items.length; }
+            clear() { this.items = []; }
+            getAll() { return [...this.items].reverse(); }
+        }
+
+        class Queue {
+            constructor() {
+                this.items = {};
+                this.headIndex = 0;
+                this.tailIndex = 0;
+            }
+            enqueue(element) {
+                this.items[this.tailIndex] = element;
+                this.tailIndex++;
+            }
+            dequeue() {
+                const element = this.items[this.headIndex];
+                if (element) {
+                    delete this.items[this.headIndex];
+                    this.headIndex++;
+                    return element;
+                }
+                return null;
+            }
+            size() {
+                return this.tailIndex - this.headIndex;
+            }
+            getAll() {
+                return Object.values(this.items);
+            }
+            clear() {
+                this.items = {};
+                this.headIndex = 0;
+                this.tailIndex = 0;
+            }
+        }
+
+        class PriorityQueue {
+            constructor() {
+                this.items = [];
+            }
+            enqueue(element, priority) {
+                const item = { element, priority: parseInt(priority) };
+                let added = false;
+                // Find position based on priority (lower number = higher priority)
+                for (let i = 0; i < this.items.length; i++) {
+                    if (item.priority < this.items[i].priority) {
+                        this.items.splice(i, 0, item);
+                        added = true;
+                        break;
+                    }
+                }
+                if (!added) {
+                    this.items.push(item);
+                }
+            }
+            dequeue() {
+                if (this.items.length === 0) return null;
+                const item = this.items.shift();
+                return item ? item.element : null;
+            }
+            size() {
+                return this.items.length;
+            }
+            getAll() {
+                return this.items;
+            }
+            clear() {
+                this.items = [];
+            }
+        }
+
+        class CircularQueue {
+            constructor(maxSize) {
+                this.maxSize = maxSize;
+                this.items = new Array(maxSize);
+                this.head = -1;
+                this.tail = -1;
+                this.currentSize = 0;
+            }
+            isFull() { return this.currentSize === this.maxSize; }
+            isEmpty() { return this.currentSize === 0; }
+            enqueue(element) {
+                if (this.isFull()) return "Queue is full";
+                
+                // Update tail
+                this.tail = (this.tail + 1) % this.maxSize;
+                this.items[this.tail] = element;
+
+                // If it was empty, set head too
+                if (this.head === -1) {
+                    this.head = this.tail;
+                }
+                this.currentSize++;
+                return true;
+            }
+            dequeue() {
+                if (this.isEmpty()) return null;
+
+                const element = this.items[this.head];
+                this.items[this.head] = undefined; // Clear the slot
+
+                if (this.currentSize === 1) {
+                    // Last element: reset queue
+                    this.head = -1;
+                    this.tail = -1;
+                } else {
+                    // Move head
+                    this.head = (this.head + 1) % this.maxSize;
+                }
+                this.currentSize--;
+                return element;
+            }
+            size() { return this.currentSize; }
+            getAll() {
+                if (this.isEmpty()) return [];
+                let result = [];
+                let count = 0;
+                let i = this.head;
+                while (count < this.currentSize) {
+                    result.push(this.items[i]);
+                    i = (i + 1) % this.maxSize;
+                    count++;
+                }
+                return result;
+            }
+            clear() {
+                this.items = new Array(this.maxSize);
+                this.head = -1;
+                this.tail = -1;
+                this.currentSize = 0;
+            }
+        }
+
+
+        // --- System Instances ---
+        const opdQueue = new Queue();          // FIFO Queue
+        const emergencyPQueue = new PriorityQueue(); // Priority Queue
+        const pharmacyCQueue = new CircularQueue(10); // Circular Queue (Max 10 tokens)
+        const historyStack = new Stack();        // LIFO Stack
+
+
+        // --- UTILITY FUNCTIONS ---
+
+        function updateDashboard() {
+            document.getElementById('opdCount').innerText = opdQueue.size();
+            document.getElementById('emergencyCount').innerText = emergencyPQueue.size();
+            document.getElementById('pharmacyCount').innerText = `${pharmacyCQueue.size()}/${pharmacyCQueue.maxSize}`;
+            document.getElementById('historyCount').innerText = historyStack.size();
+
+            // Update Detail views
+            document.getElementById('opdCountDetail').innerText = opdQueue.size();
+            document.getElementById('emergencyCountDetail').innerText = emergencyPQueue.size();
+            document.getElementById('pharmacyCountDetail').innerText = `${pharmacyCQueue.size()}/${pharmacyCQueue.maxSize}`;
+            document.getElementById('historyCountDetail').innerText = historyStack.size();
+
+            renderLists();
+            document.getElementById('patientID').value = patientIDCounter + 1; // Update registration ID
+        }
+
+        function logAction(action, patient) {
+            const timestamp = new Date().toLocaleTimeString();
+            historyStack.push(`[${timestamp}] ${action} - ID:${patient.id} (${patient.name})`);
+            updateDashboard();
+        }
+
+        function renderPatientListItem(patient, type, priority = null) {
+            const colorVar = type === 'opd' ? 'var(--opd-color)' : type === 'emergency' ? 'var(--emergency-color)' : 'var(--pharmacy-color)';
+            const priorityBadge = priority !== null ? `<span class="badge" style="background-color: ${priorityColor(priority)};">P${priority}</span>` : '';
+            
+            return `
+                <li style="border-left-color: ${colorVar};">
+                    <div>
+                        <strong>${patient.name}</strong> 
+                        <span style="color: var(--secondary-text); font-size: 0.9rem;">(ID: ${patient.id})</span>
+                    </div>
+                    ${priorityBadge}
+                    <span class="badge" style="background-color: ${colorVar};">${type.toUpperCase()}</span>
+                </li>
+            `;
+        }
+
+        function priorityColor(priority) {
+            if (priority <= 2) return 'var(--emergency-color)'; // Red/Critical
+            if (priority === 3) return 'var(--opd-color)';      // Yellow/Urgent
+            return 'var(--primary-color)';                       // Blue/Standard
+        }
+
+        function renderLists() {
+            // 1. OPD List
+            const opdListEl = document.getElementById('opdList');
+            opdListEl.innerHTML = '';
+            const opdPatients = opdQueue.getAll();
+            if (opdPatients.length === 0) {
+                opdListEl.innerHTML = '<li class="empty-list-message">No patients in OPD Queue.</li>';
+            } else {
+                opdPatients.forEach(p => {
+                    opdListEl.innerHTML += renderPatientListItem(p, 'opd');
+                });
+            }
+
+            // 2. Emergency List
+            const emergencyListEl = document.getElementById('emergencyList');
+            emergencyListEl.innerHTML = '';
+            const emergencyItems = emergencyPQueue.getAll(); // Items contain {element, priority}
+            if (emergencyItems.length === 0) {
+                emergencyListEl.innerHTML = '<li class="empty-list-message">No patients in Emergency P-Queue.</li>';
+            } else {
+                emergencyItems.forEach(item => {
+                    emergencyListEl.innerHTML += renderPatientListItem(item.element, 'emergency', item.priority);
+                });
+            }
+
+            // 3. Pharmacy List
+            const pharmacyListEl = document.getElementById('pharmacyList');
+            pharmacyListEl.innerHTML = '';
+            const pharmacyPatients = pharmacyCQueue.getAll();
+            if (pharmacyPatients.length === 0) {
+                pharmacyListEl.innerHTML = '<li class="empty-list-message">No active tokens in C-Queue.</li>';
+            } else {
+                pharmacyPatients.forEach(p => {
+                    pharmacyListEl.innerHTML += renderPatientListItem(p, 'pharmacy');
+                });
+            }
+
+            // 4. History List
+            const historyListEl = document.getElementById('historyList');
+            historyListEl.innerHTML = '';
+            const historyItems = historyStack.getAll(); // Get elements in LIFO order (latest first)
+            if (historyItems.length === 0) {
+                historyListEl.innerHTML = '<li class="empty-list-message">No actions recorded yet.</li>';
+            } else {
+                historyItems.forEach(action => {
+                    historyListEl.innerHTML += `<li style="border-left-color: var(--action-color);">${action}</li>`;
+                });
+            }
+        }
+
+
+        // --- WORKFLOW FUNCTIONS ---
+
+        function registerPatient() {
+            const name = document.getElementById('patientName').value.trim();
+            const section = document.getElementById('patientSection').value;
+            const priority = document.getElementById('patientPriority').value;
+
+            if (!name) {
+                console.warn("Registration Failed: Patient name is required.");
+                return;
+            }
+
+            const patient = {
+                id: ++patientIDCounter,
+                name: name,
+                registrationTime: new Date().getTime()
+            };
+
+            if (section === 'opd') {
+                opdQueue.enqueue(patient);
+                logAction('Registered to OPD', patient);
+                showView('opd'); // Move to OPD view after registration
+                console.log(`Patient ${name} (ID: ${patient.id}) added to OPD Queue.`);
+            } else if (section === 'emergency') {
+                emergencyPQueue.enqueue(patient, priority);
+                logAction(`Registered to Emergency (P${priority})`, patient);
+                showView('emergency'); // Move to Emergency view after registration
+                console.log(`Patient ${name} (ID: ${patient.id}) added to Emergency P-Queue with priority ${priority}.`);
+            }
+
+            // Reset form for next entry
+            document.getElementById('patientName').value = '';
+            updateDashboard();
+        }
+
+        function manageOPD() {
+            const patient = opdQueue.dequeue();
+            if (patient) {
+                // Step 1: Dequeue from OPD
+                logAction('Dequeued from OPD', patient);
+
+                // Step 2: Enqueue to Pharmacy (if space is available)
+                const pharmacyResult = pharmacyCQueue.enqueue(patient);
+
+                if (pharmacyResult === "Queue is full") {
+                    // Patient is processed but sent home because pharmacy is full (edge case)
+                    console.warn(`Patient ${patient.name} processed from OPD but Pharmacy is Full. Discharged directly.`);
+                    logAction('Discharged (Pharmacy Full)', patient);
+                } else {
+                    logAction('Enqueued to Pharmacy', patient);
+                }
+            } else {
+                console.warn("OPD Queue is empty. Cannot process next patient.");
+            }
+            updateDashboard();
+        }
+
+        function manageEmergency() {
+            const patient = emergencyPQueue.dequeue();
+            if (patient) {
+                // Step 1: Dequeue from Emergency (highest priority)
+                logAction('Processed from Emergency', patient);
+
+                // Step 2: Enqueue to Pharmacy (if space is available)
+                const pharmacyResult = pharmacyCQueue.enqueue(patient);
+
+                if (pharmacyResult === "Queue is full") {
+                    // Patient is processed but sent home because pharmacy is full (edge case)
+                    console.warn(`Patient ${patient.name} processed from Emergency but Pharmacy is Full. Discharged directly.`);
+                    logAction('Discharged (Pharmacy Full)', patient);
+                } else {
+                    logAction('Enqueued to Pharmacy', patient);
+                }
+            } else {
+                console.warn("Emergency Priority Queue is empty. Cannot process next patient.");
+            }
+            updateDashboard();
+        }
+
+        function managePharmacy() {
+            const patient = pharmacyCQueue.dequeue();
+            if (patient) {
+                logAction('Dispensed from Pharmacy', patient);
+                console.log(`Order dispensed for Patient ${patient.name}. Token slot freed.`);
+            } else {
+                console.warn("Pharmacy Token Queue is empty. Nothing to dispense.");
+            }
+            updateDashboard();
+        }
+
+        function undoLastAction() {
+            const lastAction = historyStack.pop();
+            if (lastAction) {
+                // NOTE: A real 'undo' would require deep rollback logic. 
+                // Here, we only log the undo action and show the stack state change.
+                console.log(`UNDO: Removed last logged action from stack: "${lastAction}"`);
+                updateDashboard();
+            } else {
+                console.warn("Action History Stack is empty. Nothing to undo.");
+            }
+            updateDashboard();
+        }
+
+        function clearAllData() {
+            // Confirmation dialog left for this critical action
+            const confirmed = window.confirm("Are you sure you want to CLEAR ALL SYSTEM DATA? This action cannot be undone.");
+
+            if (confirmed) {
+                opdQueue.clear();
+                emergencyPQueue.clear();
+                pharmacyCQueue.clear();
+                historyStack.clear();
+                patientIDCounter = 1000;
+
+                // Reset views
+                showView('dashboard');
+                updateDashboard();
+                console.error("SYSTEM DATA CLEARED. All queues and history have been reset.");
+            }
+        }
+
+
+        // --- UI / NAVIGATION FUNCTIONS ---
+
+        function startDashboard() {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('dashboardContainer').style.display = 'grid';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling on main app page
+            showView('dashboard');
+        }
+
+        function returnToHome() {
+            document.getElementById('landingPage').style.display = 'flex';
+            document.getElementById('dashboardContainer').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Allow scrolling on landing page
+        }
+
+        function showView(viewId) {
+            // Hide all content views
+            document.querySelectorAll('.content-view').forEach(view => {
+                view.style.display = 'none';
+            });
+
+            // Show the requested view
+            const targetView = document.getElementById(viewId + 'View');
+            if (targetView) {
+                targetView.style.display = 'block';
+            }
+
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Find the link that triggers this view and make it active
+            const activeLink = document.querySelector(`.sidebar-menu a[onclick*="showView('${viewId}')"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+
+            // Close the mobile menu after selection
+            closeMenu();
+
+            // Specific update functions
+            updateDashboard();
+            
+            // Show/hide priority field based on section
+            if (viewId === 'registration') {
+                const sectionSelect = document.getElementById('patientSection');
+                sectionSelect.removeEventListener('change', togglePriorityField); // Remove previous listener to avoid duplicates
+                sectionSelect.addEventListener('change', togglePriorityField);
+                togglePriorityField(); // Call once on load
+            }
+        }
+
+        function togglePriorityField() {
+            const section = document.getElementById('patientSection').value;
+            const priorityDiv = document.getElementById('priorityDiv');
+            
+            if (section === 'emergency') {
+                priorityDiv.style.display = 'block';
+            } else {
+                priorityDiv.style.display = 'none';
+            }
+        }
+
+        // --- MOBILE MENU TOGGLE IMPLEMENTATION ---
+        function toggleMenu() {
+            const menu = document.getElementById('sidebarMenu');
+            const icon = document.getElementById('menuIcon');
+            
+            if (menu.classList.contains('active')) {
+                closeMenu();
+            } else {
+                menu.classList.add('active');
+                icon.classList.remove('fa-ellipsis-v');
+                icon.classList.add('fa-times');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            }
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('sidebarMenu');
+            const icon = document.getElementById('menuIcon');
+            
+            menu.classList.remove('active');
+            
+            // Only change icon back if it's currently the 'close' icon
+            if (icon.classList.contains('fa-times')) {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-ellipsis-v');
+            }
+            
+            // Re-enable scrolling only if we are in dashboard container
+            if (document.getElementById('dashboardContainer').style.display === 'grid') {
+                document.body.style.overflow = 'hidden'; // Dashboard container handles internal scroll
+            } else {
+                document.body.style.overflow = 'auto'; 
+            }
+        }
+
+        // Function to close menu if main content area is clicked on mobile
+        function closeMenuOnContentClick() {
+            const menu = document.getElementById('sidebarMenu');
+            if (menu.classList.contains('active')) {
+                closeMenu();
+            }
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDashboard();
+            // Start view is handled by startDashboard() button click
+        });
+    </script>
+</body>
+</html>
